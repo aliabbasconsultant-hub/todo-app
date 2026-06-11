@@ -163,21 +163,21 @@ onMounted(fetchTodos)
 .card { background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
 h1 { font-size: 28px; font-weight: 700; margin-bottom: 24px; color: #1a1a2e; }
 .add-todo { display: flex; gap: 12px; margin-bottom: 24px; }
-.input { flex: 1; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 15px; outline: none; transition: border-color 0.2s; }
+.input { padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 15px; outline: none; transition: border-color 0.2s; width: 100%; }
 .input:focus { border-color: #667eea; }
-.edit-input { flex: 1; }
-.btn { padding: 10px 18px; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; font-weight: 600; transition: opacity 0.2s; }
+.edit-input { flex: 1; padding: 8px 12px; font-size: 15px; }
+.btn { padding: 7px 14px; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 600; transition: opacity 0.2s; white-space: nowrap; }
 .btn:hover { opacity: 0.85; }
-.btn-add { background: #667eea; color: white; }
-.btn-edit { background: #EBF4FF; color: #185FA5; padding: 7px 14px; font-size: 13px; }
-.btn-delete { background: #fee2e2; color: #dc2626; padding: 7px 14px; font-size: 13px; }
-.btn-save { background: #E1F5EE; color: #0F6E56; padding: 7px 14px; font-size: 13px; }
-.btn-cancel { background: #f1f5f9; color: #64748b; padding: 7px 14px; font-size: 13px; }
-.btn-group { display: flex; gap: 6px; }
-.todo-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 10px; margin-bottom: 8px; background: #f8fafc; }
+.btn-add { background: #667eea; color: white; padding: 12px 20px; font-size: 15px; white-space: nowrap; }
+.btn-edit { background: #EBF4FF; color: #185FA5; }
+.btn-delete { background: #fee2e2; color: #dc2626; }
+.btn-save { background: #E1F5EE; color: #0F6E56; }
+.btn-cancel { background: #f1f5f9; color: #64748b; }
+.btn-group { display: flex; gap: 6px; width: 140px; flex-shrink: 0; justify-content: flex-end; }
+.todo-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 10px; margin-bottom: 8px; background: #f8fafc; min-height: 56px; }
 .todo-item:hover { background: #f1f5f9; }
 .todo-item.completed .todo-title { text-decoration: line-through; color: #94a3b8; }
-.checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: #667eea; }
+.checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: #667eea; flex-shrink: 0; }
 .todo-title { flex: 1; font-size: 15px; color: #334155; }
 .empty { text-align: center; color: #94a3b8; padding: 40px 0; font-size: 15px; }
 .loading { text-align: center; color: #667eea; padding: 40px 0; }
