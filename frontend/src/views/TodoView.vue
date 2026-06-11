@@ -18,38 +18,40 @@
       <div v-else>
         <div v-if="todos.length === 0" class="empty">No todos yet! Add one above.</div>
 
-        <div
-          v-for="todo in todos"
-          :key="todo.id"
-          class="todo-item"
-          :class="{ completed: todo.completed && editingId !== todo.id }"
-        >
-          <input
-            type="checkbox"
-            :checked="todo.completed"
-            @change="toggleTodo(todo)"
-            class="checkbox"
-          />
+        <div class="todo-list">
+          <div
+            v-for="todo in todos"
+            :key="todo.id"
+            class="todo-item"
+            :class="{ completed: todo.completed && editingId !== todo.id }"
+          >
+            <input
+              type="checkbox"
+              :checked="todo.completed"
+              @change="toggleTodo(todo)"
+              class="checkbox"
+            />
 
-          <input
-            v-if="editingId === todo.id"
-            v-model="editingTitle"
-            @keyup.enter="saveEdit(todo)"
-            @keyup.escape="cancelEdit"
-            class="edit-input"
-            autofocus
-          />
-          <span v-else class="todo-title">{{ todo.title }}</span>
+            <input
+              v-if="editingId === todo.id"
+              v-model="editingTitle"
+              @keyup.enter="saveEdit(todo)"
+              @keyup.escape="cancelEdit"
+              class="edit-input"
+              autofocus
+            />
+            <span v-else class="todo-title">{{ todo.title }}</span>
 
-          <div class="btn-group">
-            <template v-if="editingId === todo.id">
-              <button @click="saveEdit(todo)" class="btn btn-save">Save</button>
-              <button @click="cancelEdit" class="btn btn-cancel">Cancel</button>
-            </template>
-            <template v-else>
-              <button @click="startEdit(todo)" class="btn btn-edit">Edit</button>
-              <button @click="deleteTodo(todo.id)" class="btn btn-delete">Delete</button>
-            </template>
+            <div class="btn-group">
+              <template v-if="editingId === todo.id">
+                <button @click="saveEdit(todo)" class="btn btn-save">Save</button>
+                <button @click="cancelEdit" class="btn btn-cancel">Cancel</button>
+              </template>
+              <template v-else>
+                <button @click="startEdit(todo)" class="btn btn-edit">Edit</button>
+                <button @click="deleteTodo(todo.id)" class="btn btn-delete">Delete</button>
+              </template>
+            </div>
           </div>
         </div>
       </div>
@@ -177,6 +179,15 @@ h1 { font-size: 28px; font-weight: 700; margin-bottom: 24px; color: #1a1a2e; }
   min-width: 0;
 }
 .input:focus { border-color: #667eea; }
+.todo-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.todo-list::-webkit-scrollbar { width: 4px; }
+.todo-list::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+.todo-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.todo-list::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 .btn {
   border: none;
   border-radius: 8px;
@@ -211,9 +222,7 @@ h1 { font-size: 28px; font-weight: 700; margin-bottom: 24px; color: #1a1a2e; }
   height: 52px;
   min-height: 52px;
   max-height: 52px;
-  width: 456px;
-  min-width: 456px;
-  max-width: 456px;
+  width: 100%;
   box-sizing: border-box;
 }
 .todo-item:hover { background: #f1f5f9; }
