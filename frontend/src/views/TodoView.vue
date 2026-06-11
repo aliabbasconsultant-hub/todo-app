@@ -3,7 +3,6 @@
     <div class="card">
       <h1>My Todo List</h1>
 
-      <!-- Add Todo -->
       <div class="add-todo">
         <input
           v-model="newTitle"
@@ -14,19 +13,16 @@
         <button @click="addTodo" class="btn btn-add">Add</button>
       </div>
 
-      <!-- Loading -->
       <div v-if="loading" class="loading">Loading...</div>
 
-      <!-- Todo List -->
       <div v-else>
-        <div v-if="todos.length === 0" class="empty">
-          No todos yet! Add one above.
-        </div>
+        <div v-if="todos.length === 0" class="empty">No todos yet! Add one above.</div>
+
         <div
           v-for="todo in todos"
           :key="todo.id"
           class="todo-item"
-          :class="{ completed: todo.completed }"
+          :class="{ completed: todo.completed && editingId !== todo.id }"
         >
           <input
             type="checkbox"
@@ -34,12 +30,35 @@
             @change="toggleTodo(todo)"
             class="checkbox"
           />
-          <span class="todo-title">{{ todo.title }}</span>
-          <button @click="deleteTodo(todo.id)" class="btn btn-delete">Delete</button>
+
+          <!-- Edit mode -->
+          <input
+            v-if="editingId === todo.id"
+            v-model="editingTitle"
+            @keyup.enter="saveEdit(todo)"
+            @keyup.escape="cancelEdit"
+            class="input edit-input"
+            ref="editInput"
+            autofocus
+          />
+
+          <!-- View mode -->
+          <span v-else class="todo-title">{{ todo.title }}</span>
+
+          <!-- Edit mode buttons -->
+          <div v-if="editingId === todo.id" class="btn-group">
+            <button @click="saveEdit(todo)" class="btn btn-save">Save</button>
+            <button @click="cancelEdit" class="btn btn-cancel">Cancel</button>
+          </div>
+
+          <!-- View mode buttons -->
+          <div v-else class="btn-group">
+            <button @click="startEdit(todo)" class="btn btn-edit">Edit</button>
+            <button @click="deleteTodo(todo.id)" class="btn btn-delete">Delete</button>
+          </div>
         </div>
       </div>
 
-      <!-- Stats -->
       <div class="stats" v-if="todos.length > 0">
         {{ completedCount }} of {{ todos.length }} completed
       </div>
@@ -48,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import axios from 'axios'
 
 const API = 'http://34.234.70.255:3000/api/todos'
@@ -63,6 +82,9 @@ interface Todo {
 const todos = ref<Todo[]>([])
 const newTitle = ref('')
 const loading = ref(false)
+const editingId = ref<number | null>(null)
+const editingTitle = ref('')
+const editInput = ref<HTMLInputElement | null>(null)
 
 const completedCount = computed(() => todos.value.filter(t => t.completed).length)
 
@@ -99,6 +121,31 @@ async function toggleTodo(todo: Todo) {
   }
 }
 
+function startEdit(todo: Todo) {
+  editingId.value = todo.id
+  editingTitle.value = todo.title
+  nextTick(() => {
+    if (editInput.value) editInput.value.focus()
+  })
+}
+
+function cancelEdit() {
+  editingId.value = null
+  editingTitle.value = ''
+}
+
+async function saveEdit(todo: Todo) {
+  if (!editingTitle.value.trim()) return
+  try {
+    const res = await axios.put(`${API}/${todo.id}`, { title: editingTitle.value })
+    const index = todos.value.findIndex(t => t.id === todo.id)
+    todos.value[index] = res.data
+    cancelEdit()
+  } catch (e) {
+    console.error('Error saving edit:', e)
+  }
+}
+
 async function deleteTodo(id: number) {
   try {
     await axios.delete(`${API}/${id}`)
@@ -112,101 +159,27 @@ onMounted(fetchTodos)
 </script>
 
 <style scoped>
-.container {
-  max-width: 600px;
-  margin: 40px auto;
-  padding: 0 20px;
-}
-.card {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-}
-h1 {
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 24px;
-  color: #1a1a2e;
-}
-.add-todo {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-.input {
-  flex: 1;
-  padding: 12px 16px;
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 15px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-.input:focus {
-  border-color: #667eea;
-}
-.btn {
-  padding: 12px 20px;
-  border: none;
-  border-radius: 10px;
-  font-size: 15px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: opacity 0.2s;
-}
+.container { max-width: 600px; margin: 40px auto; padding: 0 20px; }
+.card { background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 24px; color: #1a1a2e; }
+.add-todo { display: flex; gap: 12px; margin-bottom: 24px; }
+.input { flex: 1; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 15px; outline: none; transition: border-color 0.2s; }
+.input:focus { border-color: #667eea; }
+.edit-input { flex: 1; }
+.btn { padding: 10px 18px; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; font-weight: 600; transition: opacity 0.2s; }
 .btn:hover { opacity: 0.85; }
-.btn-add {
-  background: #667eea;
-  color: white;
-}
-.btn-delete {
-  background: #fee2e2;
-  color: #dc2626;
-  padding: 8px 14px;
-  font-size: 13px;
-}
-.todo-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  border-radius: 10px;
-  margin-bottom: 8px;
-  background: #f8fafc;
-  transition: background 0.2s;
-}
+.btn-add { background: #667eea; color: white; }
+.btn-edit { background: #EBF4FF; color: #185FA5; padding: 7px 14px; font-size: 13px; }
+.btn-delete { background: #fee2e2; color: #dc2626; padding: 7px 14px; font-size: 13px; }
+.btn-save { background: #E1F5EE; color: #0F6E56; padding: 7px 14px; font-size: 13px; }
+.btn-cancel { background: #f1f5f9; color: #64748b; padding: 7px 14px; font-size: 13px; }
+.btn-group { display: flex; gap: 6px; }
+.todo-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 10px; margin-bottom: 8px; background: #f8fafc; }
 .todo-item:hover { background: #f1f5f9; }
-.todo-item.completed .todo-title {
-  text-decoration: line-through;
-  color: #94a3b8;
-}
-.checkbox {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  accent-color: #667eea;
-}
-.todo-title {
-  flex: 1;
-  font-size: 15px;
-  color: #334155;
-}
-.empty {
-  text-align: center;
-  color: #94a3b8;
-  padding: 40px 0;
-  font-size: 15px;
-}
-.loading {
-  text-align: center;
-  color: #667eea;
-  padding: 40px 0;
-}
-.stats {
-  margin-top: 20px;
-  text-align: center;
-  font-size: 13px;
-  color: #94a3b8;
-}
+.todo-item.completed .todo-title { text-decoration: line-through; color: #94a3b8; }
+.checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: #667eea; }
+.todo-title { flex: 1; font-size: 15px; color: #334155; }
+.empty { text-align: center; color: #94a3b8; padding: 40px 0; font-size: 15px; }
+.loading { text-align: center; color: #667eea; padding: 40px 0; }
+.stats { margin-top: 20px; text-align: center; font-size: 13px; color: #94a3b8; }
 </style>
